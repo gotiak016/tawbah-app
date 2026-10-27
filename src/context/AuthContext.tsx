@@ -97,10 +97,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
       const signInResult = await GoogleSignin.signIn();
 
-      // استخراج الـ ID Token من تسجيل الدخول
-      const idToken = signInResult.data?.idToken;
+      // استخراج الـ ID Token من تسجيل الدخول (يدعم كل إصدارات google-signin القديمة والحديثة v13+)
+      const idToken = signInResult.data?.idToken || (signInResult as any).idToken;
       if (!idToken) {
-        throw new Error('لم يتم استلام ID Token من Google');
+        throw new Error('لم يتم استلام ID Token من Google. تأكد من إضافة بصمة SHA-1 في Firebase Console وتفعيل Google Sign-In.');
       }
 
       // بناء اعتماد Firebase وتسجيل الدخول
@@ -114,7 +114,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
         Alert.alert('خطأ', 'خدمات Google Play غير متوفرة أو تحتاج لتحديث');
       } else {
-        Alert.alert('فشل تسجيل الدخول', error.message || 'حدث خطأ أثناء الاتصال بحساب Google');
+        const errorDetail = error.code ? `[كود: ${error.code}] ${error.message}` : error.message;
+        Alert.alert('فشل تسجيل الدخول', errorDetail || 'حدث خطأ أثناء الاتصال بحساب Google. تأكد من إعداد Firebase Console');
       }
     } finally {
       setIsLoading(false);
