@@ -1,0 +1,49 @@
+{
+  "expo": {
+    "name": "توبة - رفيق التعافي والثبات",
+    "slug": "tawbah-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FAF8F5"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.tawbah.app"
+    },
+    "android": {
+      "package": "com.tawbah.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FAF8F5"
+      },
+      "permissions": [
+        "android.permission.INTERNET",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.VIBRATE",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.WAKE_LOCK"
+      ],
+      "googleServicesFile": "./google-services.json"
+    },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#2E6B56"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "439b97ad-5e4f-411c-9f2f-dc1507b42300"
+      }
+    }
+  }
+}
