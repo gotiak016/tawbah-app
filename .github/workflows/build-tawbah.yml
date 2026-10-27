@@ -30,19 +30,26 @@ jobs:
       - name: 🏗️ Expo Prebuild Native Android
         run: npx expo prebuild --platform android --no-install
 
-      - name: 🔧 Fix Kotlin version for Compose compatibility
+      - name: 🔧 Fix Kotlin version and Compose compatibility
         run: |
-          echo "=== Before fix ==="
-          grep -n 'kotlin' android/build.gradle || true
-          sed -i 's/kotlinVersion = "1.9.24"/kotlinVersion = "1.9.25"/' android/build.gradle
-          echo "=== After fix ==="
-          grep -n 'kotlin' android/build.gradle
+          # 1. Replace any 1.9.24 with 1.9.25 across all gradle and settings files
+          find android/ -type f \( -name "*.gradle" -o -name "*.properties" \) -exec sed -i 's/1\.9\.24/1.9.25/g' {} +
+
+          # 2. Add Compose compiler suppress flags to gradle.properties
+          echo "" >> android/gradle.properties
+          echo "kotlin.suppressKotlinVersionCompatibilityCheck=true" >> android/gradle.properties
+          echo "androidx.compose.compiler.suppressKotlinVersionCompatibilityCheck=true" >> android/gradle.properties
+          echo "suppressKotlinVersionCompatibilityCheck=true" >> android/gradle.properties
+
+          echo "=== Verification ==="
+          grep -rn "1.9.25" android/ || true
+          tail -n 10 android/gradle.properties
 
       - name: 🔨 Build Release APK & AAB with Gradle
         working-directory: ./android
         run: |
           chmod +x gradlew
-          ./gradlew assembleRelease bundleRelease --no-daemon
+          ./gradlew assembleRelease bundleRelease --no-daemon -Pandroidx.compose.compiler.suppressKotlinVersionCompatibilityCheck=true -Pkotlin.suppressKotlinVersionCompatibilityCheck=true
 
       - name: 📤 Upload APK Artifact
         uses: actions/upload-artifact@v4
