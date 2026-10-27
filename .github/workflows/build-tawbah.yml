@@ -36,29 +36,11 @@ jobs:
       - name: 🏗️ Expo Prebuild Native Android
         run: npx expo prebuild --platform android --no-install
 
-      - name: 🔧 Inject Compose Compiler Compatibility Override
+      - name: 🔧 Ensure Kotlin 1.9.25 across all build files
         run: |
-          # Patch all gradle files to 1.9.25 just in case
           find android/ -type f \( -name "*.gradle" -o -name "*.properties" -o -name "*.toml" \) -exec sed -i 's/1\.9\.24/1.9.25/g' {} +
-
-          # Append suppress compiler args to root android/build.gradle
-          cat << 'EOF' >> android/build.gradle
-
-          subprojects {
-              afterEvaluate { project ->
-                  if (project.hasProperty('android')) {
-                      tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
-                          kotlinOptions {
-                              freeCompilerArgs += [
-                                  "-P",
-                                  "plugin:androidx.compose.compiler.plugins.kotlin:suppressKotlinVersionCompatibilityCheck=true"
-                              ]
-                          }
-                      }
-                  }
-              }
-          }
-          EOF
+          echo "Verified kotlinVersion in build.gradle:"
+          grep -rn "kotlinVersion" android/ || true
 
       - name: 🔨 Build Release APK & AAB with Gradle
         working-directory: ./android
