@@ -27,20 +27,15 @@ jobs:
       - name: 📦 Install Dependencies
         run: npm install --legacy-peer-deps
 
-      - name: 🎯 Patch React Native TOML Version Catalog to Kotlin 1.9.25
+      - name: 🎯 Patch Compose Compiler to 1.5.14 for Kotlin 1.9.24 compatibility
         run: |
-          sed -i 's/kotlin = "1.9.24"/kotlin = "1.9.25"/g' node_modules/react-native/gradle/libs.versions.toml
-          echo "Verified libs.versions.toml:"
-          grep 'kotlin = ' node_modules/react-native/gradle/libs.versions.toml
+          sed -i 's/"1.5.15"/"1.5.14"/g' node_modules/expo-modules-core/android/build.gradle
+          sed -i 's/kotlinCompilerExtensionVersion = versionsMap\[kotlinVersion()\]/kotlinCompilerExtensionVersion = "1.5.14"/g' node_modules/expo-modules-core/android/build.gradle
+          echo "Verified expo-modules-core build.gradle composeOptions:"
+          grep -A 5 'composeOptions' node_modules/expo-modules-core/android/build.gradle
 
       - name: 🏗️ Expo Prebuild Native Android
         run: npx expo prebuild --platform android --no-install
-
-      - name: 🔧 Ensure Kotlin 1.9.25 across all build files
-        run: |
-          find android/ -type f \( -name "*.gradle" -o -name "*.properties" -o -name "*.toml" \) -exec sed -i 's/1\.9\.24/1.9.25/g' {} +
-          echo "Verified kotlinVersion in build.gradle:"
-          grep -rn "kotlinVersion" android/ || true
 
       - name: 🔨 Build Release APK & AAB with Gradle
         working-directory: ./android
