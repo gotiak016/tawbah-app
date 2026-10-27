@@ -27,29 +27,44 @@ jobs:
       - name: 📦 Install Dependencies
         run: npm install --legacy-peer-deps
 
+      - name: 🎯 Patch React Native TOML Version Catalog to Kotlin 1.9.25
+        run: |
+          sed -i 's/kotlin = "1.9.24"/kotlin = "1.9.25"/g' node_modules/react-native/gradle/libs.versions.toml
+          echo "Verified libs.versions.toml:"
+          grep 'kotlin = ' node_modules/react-native/gradle/libs.versions.toml
+
       - name: 🏗️ Expo Prebuild Native Android
         run: npx expo prebuild --platform android --no-install
 
-      - name: 🔧 Fix Kotlin version and Compose compatibility
+      - name: 🔧 Inject Compose Compiler Compatibility Override
         run: |
-          # 1. Replace any 1.9.24 with 1.9.25 across all gradle and settings files
-          find android/ -type f \( -name "*.gradle" -o -name "*.properties" \) -exec sed -i 's/1\.9\.24/1.9.25/g' {} +
+          # Patch all gradle files to 1.9.25 just in case
+          find android/ -type f \( -name "*.gradle" -o -name "*.properties" -o -name "*.toml" \) -exec sed -i 's/1\.9\.24/1.9.25/g' {} +
 
-          # 2. Add Compose compiler suppress flags to gradle.properties
-          echo "" >> android/gradle.properties
-          echo "kotlin.suppressKotlinVersionCompatibilityCheck=true" >> android/gradle.properties
-          echo "androidx.compose.compiler.suppressKotlinVersionCompatibilityCheck=true" >> android/gradle.properties
-          echo "suppressKotlinVersionCompatibilityCheck=true" >> android/gradle.properties
+          # Append suppress compiler args to root android/build.gradle
+          cat << 'EOF' >> android/build.gradle
 
-          echo "=== Verification ==="
-          grep -rn "1.9.25" android/ || true
-          tail -n 10 android/gradle.properties
+          subprojects {
+              afterEvaluate { project ->
+                  if (project.hasProperty('android')) {
+                      tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+                          kotlinOptions {
+                              freeCompilerArgs += [
+                                  "-P",
+                                  "plugin:androidx.compose.compiler.plugins.kotlin:suppressKotlinVersionCompatibilityCheck=true"
+                              ]
+                          }
+                      }
+                  }
+              }
+          }
+          EOF
 
       - name: 🔨 Build Release APK & AAB with Gradle
         working-directory: ./android
         run: |
           chmod +x gradlew
-          ./gradlew assembleRelease bundleRelease --no-daemon -Pandroidx.compose.compiler.suppressKotlinVersionCompatibilityCheck=true -Pkotlin.suppressKotlinVersionCompatibilityCheck=true
+          ./gradlew assembleRelease bundleRelease --no-daemon
 
       - name: 📤 Upload APK Artifact
         uses: actions/upload-artifact@v4
