@@ -40,21 +40,7 @@ jobs:
       - name: 🔑 Configure Release Signing with dedicated Keystore
         run: |
           cp tawbah-release-key.keystore android/app/tawbah-release-key.keystore
-          node -e '
-            const fs = require("fs");
-            let bg = fs.readFileSync("android/app/build.gradle", "utf8");
-            const releaseSigning = `        release {
-            storeFile file("tawbah-release-key.keystore")
-            storePassword "tawbah123456"
-            keyAlias "tawbah-key-alias"
-            keyPassword "tawbah123456"
-        }`;
-            if (bg.includes("signingConfigs {")) {
-              bg = bg.replace(/signingConfigs\s*\{/, "signingConfigs {\n" + releaseSigning);
-            }
-            bg = bg.replace(/signingConfig signingConfigs\.debug/g, "signingConfig signingConfigs.release");
-            fs.writeFileSync("android/app/build.gradle", bg);
-          '
+          node scripts/configure-signing.js
           echo "=== Verification of signing in android/app/build.gradle ==="
           grep -A 10 'signingConfigs {' android/app/build.gradle || true
 
