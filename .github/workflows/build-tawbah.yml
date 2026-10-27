@@ -30,6 +30,17 @@ jobs:
       - name: 🏗️ Expo Prebuild Native Android
         run: npx expo prebuild --platform android --no-install
 
+      - name: 🔧 Fix Kotlin version for Compose compatibility
+        run: |
+          # Ensure kotlinVersion is 1.9.25 (required by Compose Compiler 1.5.15)
+          if grep -q 'kotlinVersion' android/build.gradle; then
+            sed -i 's/kotlinVersion\s*=\s*"1\.9\.[0-9]*"/kotlinVersion = "1.9.25"/' android/build.gradle
+          else
+            sed -i '/ext {/a\        kotlinVersion = "1.9.25"' android/build.gradle
+          fi
+          echo "--- android/build.gradle kotlinVersion ---"
+          grep -n 'kotlinVersion' android/build.gradle || echo "not found"
+
       - name: 🔨 Build Release APK & AAB with Gradle
         working-directory: ./android
         run: |
