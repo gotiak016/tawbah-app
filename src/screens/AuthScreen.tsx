@@ -7,12 +7,13 @@ import {
   ActivityIndicator,
   SafeAreaView,
   StatusBar,
+  Image,
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { Theme } from '../config/theme';
 
 export const AuthScreen = () => {
-  const { signInWithGoogle, isLoading } = useAuth();
+  const { signInWithGoogle, signInAsGuest, isLoading } = useAuth();
 
   return (
     <SafeAreaView style={styles.container}>
@@ -21,9 +22,11 @@ export const AuthScreen = () => {
       <View style={styles.content}>
         {/* الشعار والرمزية الإسلامية الفاتحة */}
         <View style={styles.header}>
-          <View style={styles.iconCircle}>
-            <Text style={styles.arabicLogo}>توبة</Text>
-          </View>
+          <Image
+            source={require('../../assets/icon.png')}
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
           <Text style={styles.title}>تَوْبَة</Text>
           <Text style={styles.subtitle}>رفيقك نحو العفة، الطهارة، والسكينة القلبية</Text>
         </View>
@@ -76,6 +79,15 @@ export const AuthScreen = () => {
             )}
           </TouchableOpacity>
 
+          <TouchableOpacity
+            style={styles.guestButton}
+            onPress={signInAsGuest}
+            disabled={isLoading}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.guestButtonText}>المتابعة كزائر (استكشاف التطبيق)</Text>
+          </TouchableOpacity>
+
           <Text style={styles.disclaimerText}>
             بالتسجيل، أنت تبدأ عهداً صادقاً مع الله. بياناتك وتقدمك في أمان تام.
           </Text>
@@ -100,22 +112,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: Theme.spacing.md,
   },
-  iconCircle: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    backgroundColor: Theme.colors.primarySoft,
-    borderWidth: 2,
-    borderColor: Theme.colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
+  logoImage: {
+    width: 96,
+    height: 96,
+    borderRadius: 24,
     marginBottom: Theme.spacing.md,
     ...Theme.shadows.card,
-  },
-  arabicLogo: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    color: Theme.colors.primaryDark,
   },
   title: {
     fontSize: Theme.typography.sizes.display,
@@ -208,6 +210,18 @@ const styles = StyleSheet.create({
     fontSize: Theme.typography.sizes.bodyLg,
     fontWeight: '700',
     color: Theme.colors.textPrimary,
+  },
+  guestButton: {
+    marginTop: Theme.spacing.md,
+    paddingVertical: Theme.spacing.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  guestButtonText: {
+    fontSize: Theme.typography.sizes.caption,
+    color: Theme.colors.primaryDark,
+    fontWeight: '700',
+    textDecorationLine: 'underline',
   },
   disclaimerText: {
     fontSize: Theme.typography.sizes.caption,

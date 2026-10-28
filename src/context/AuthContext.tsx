@@ -10,6 +10,7 @@ interface AuthContextType {
   userProfile: UserHabitProfile | null;
   isLoading: boolean;
   signInWithGoogle: () => Promise<void>;
+  signInAsGuest: () => Promise<void>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -123,6 +124,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   /**
+   * الدخول كضيف للتجربة المباشرة دون تعطيل
+   */
+  const signInAsGuest = async () => {
+    try {
+      setIsLoading(true);
+      let profile = await StorageService.getLocalProfile();
+      if (!profile) {
+        profile = {
+          uid: 'guest_' + Date.now(),
+          email: null,
+          displayName: 'تائب إلى الله (مستكشف)',
+          photoURL: null,
+          streakDays: 0,
+          longestStreak: 0,
+          startDate: new Date().toISOString(),
+          lastRelapseDate: null,
+          lastCheckInDate: null,
+          panicAttacksCount: 0,
+          relapsesCount: 0,
+          assessmentReport: null,
+          savedMoneyEst: 0,
+          tasbeehCount: 0,
+        };
+        await StorageService.saveLocalProfile(profile);
+      }
+      setUserProfile(profile);
+      // ضبط كائن مستخدم وهمي لفتح الشاشات
+      setUser({
+        uid: profile.uid,
+        displayName: profile.displayName,
+        isAnonymous: true,
+      } as any);
+    } catch (e: any) {
+      Alert.alert('خطأ', 'تعذر المتابعة كضيف');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /**
    * تسجيل الخروج
    */
   const signOut = async () => {
@@ -153,6 +194,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         userProfile,
         isLoading,
         signInWithGoogle,
+        signInAsGuest,
         signOut,
         refreshProfile,
       }}
