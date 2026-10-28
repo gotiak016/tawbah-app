@@ -13,7 +13,7 @@ import { useAuth } from '../context/AuthContext';
 import { Theme } from '../config/theme';
 
 export const AuthScreen = () => {
-  const { signInWithGoogle, signInAsGuest, isLoading } = useAuth();
+  const { signInWithGoogle, isLoading } = useAuth();
 
   return (
     <SafeAreaView style={styles.container}>
@@ -77,15 +77,6 @@ export const AuthScreen = () => {
                 <Text style={styles.googleButtonText}>تسجيل الدخول بواسطة Google</Text>
               </View>
             )}
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.guestButton}
-            onPress={signInAsGuest}
-            disabled={isLoading}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.guestButtonText}>المتابعة كزائر (استكشاف التطبيق)</Text>
           </TouchableOpacity>
 
           <Text style={styles.disclaimerText}>
@@ -210,18 +201,6 @@ const styles = StyleSheet.create({
     fontSize: Theme.typography.sizes.bodyLg,
     fontWeight: '700',
     color: Theme.colors.textPrimary,
-  },
-  guestButton: {
-    marginTop: Theme.spacing.md,
-    paddingVertical: Theme.spacing.sm,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  guestButtonText: {
-    fontSize: Theme.typography.sizes.caption,
-    color: Theme.colors.primaryDark,
-    fontWeight: '700',
-    textDecorationLine: 'underline',
   },
   disclaimerText: {
     fontSize: Theme.typography.sizes.caption,
